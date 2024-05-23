@@ -1110,7 +1110,7 @@ pub(crate) fn from_substrait_type(dt: &Type) -> Result<DataType> {
     from_substrait_type_with_names(dt, &vec![], &mut 0)
 }
 
-pub(crate) fn from_substrait_type_with_names(
+fn from_substrait_type_with_names(
     dt: &Type,
     dfs_names: &Vec<String>,
     name_idx: &mut usize,
@@ -1478,7 +1478,7 @@ fn from_substrait_literal_with_names(
             builder.build()?
         }
         Some(LiteralType::Null(ntype)) => {
-            from_substrait_null(ntype, dfs_names, name_idx)?
+            from_substrait_null_with_names(ntype, dfs_names, name_idx)?
         }
         _ => return not_impl_err!("Unsupported literal_type: {:?}", lit.literal_type),
     };
@@ -1486,7 +1486,7 @@ fn from_substrait_literal_with_names(
     Ok(scalar_value)
 }
 
-fn from_substrait_null(
+fn from_substrait_null_with_names(
     null_type: &Type,
     dfs_names: &Vec<String>,
     name_idx: &mut usize,
