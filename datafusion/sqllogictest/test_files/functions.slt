@@ -383,6 +383,12 @@ SELECT substr('alphabet', 3)
 ----
 phabet
 
+# Alias for substr
+query T
+SELECT substring('alphabet', 3)
+----
+phabet
+
 query T
 SELECT substr('alphabet', 30)
 ----

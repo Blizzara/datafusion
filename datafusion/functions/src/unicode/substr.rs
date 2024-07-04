@@ -32,6 +32,7 @@ use crate::utils::{make_scalar_function, utf8_to_str_type};
 #[derive(Debug)]
 pub struct SubstrFunc {
     signature: Signature,
+    aliases: Vec<String>,
 }
 
 impl Default for SubstrFunc {
@@ -53,6 +54,7 @@ impl SubstrFunc {
                 ],
                 Volatility::Immutable,
             ),
+            aliases: vec![String::from("substring")],
         }
     }
 }
@@ -64,6 +66,10 @@ impl ScalarUDFImpl for SubstrFunc {
 
     fn name(&self) -> &str {
         "substr"
+    }
+
+    fn aliases(&self) -> &[String] {
+        &self.aliases
     }
 
     fn signature(&self) -> &Signature {

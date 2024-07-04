@@ -184,7 +184,7 @@ impl StringToArray {
                 ],
                 Volatility::Immutable,
             ),
-            aliases: vec![String::from("string_to_list")],
+            aliases: vec![String::from("string_to_list"), String::from("string_split")],
         }
     }
 }

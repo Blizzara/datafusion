@@ -6471,6 +6471,19 @@ select string_to_list(e, 'm') from values;
 [adipiscing]
 NULL
 
+query ?
+select string_split(e, 'm') from values;
+----
+[Lore, ]
+[ipsu, ]
+[dolor]
+[sit]
+[a, et]
+[,]
+[consectetur]
+[adipiscing]
+NULL
+
 # array_resize scalar function #1
 query ?
 select array_resize(make_array(1, 2, 3), 1);
