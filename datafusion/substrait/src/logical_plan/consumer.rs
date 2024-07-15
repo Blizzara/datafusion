@@ -95,6 +95,11 @@ use substrait::proto::{
 };
 use substrait::proto::{FunctionArgument, SortField};
 
+// Substrait TimestampTz only says that the timestamp is relative to UTC, which
+// is the same as the expectation for any NON-empty timezone in DF. Any timezone would give
+// correct points on a timeline, but the timezone may get used for arithmetic and display.
+const DEFAULT_TIMEZONE: &str = "UTC";
+
 pub fn name_to_op(name: &str) -> Option<Operator> {
     match name {
         "equal" => Some(Operator::Eq),
@@ -1395,16 +1400,16 @@ fn from_substrait_type(
                 // is the same as the expectation for any non-empty timezone in DF. Which timezone
                 // we select here doesn't really matter that much, but we default to UTC.
                 TIMESTAMP_SECOND_TYPE_VARIATION_REF => {
-                    Ok(DataType::Timestamp(TimeUnit::Second, Some("UTC".into())))
+                    Ok(DataType::Timestamp(TimeUnit::Second, Some(DEFAULT_TIMEZONE.into())))
                 }
                 TIMESTAMP_MILLI_TYPE_VARIATION_REF => {
-                    Ok(DataType::Timestamp(TimeUnit::Millisecond, Some("UTC".into())))
+                    Ok(DataType::Timestamp(TimeUnit::Millisecond, Some(DEFAULT_TIMEZONE.into())))
                 }
                 TIMESTAMP_MICRO_TYPE_VARIATION_REF => {
-                    Ok(DataType::Timestamp(TimeUnit::Microsecond, Some("UTC".into())))
+                    Ok(DataType::Timestamp(TimeUnit::Microsecond, Some(DEFAULT_TIMEZONE.into())))
                 }
                 TIMESTAMP_NANO_TYPE_VARIATION_REF => {
-                    Ok(DataType::Timestamp(TimeUnit::Nanosecond, Some("UTC".into())))
+                    Ok(DataType::Timestamp(TimeUnit::Nanosecond, Some(DEFAULT_TIMEZONE.into())))
                 }
                 v => not_impl_err!(
                     "Unsupported Substrait type variation {v} of type {s_kind:?}"
@@ -1725,20 +1730,17 @@ fn from_substrait_literal(
             }
         },
         Some(LiteralType::TimestampTz(t)) => match lit.type_variation_reference {
-            // Substrait TimestampTz only says that the timestamp is relative to UTC, which
-            // is the same as the expectation for any non-empty timezone in DF. Which timezone
-            // we select here doesn't really matter that much, but we default to UTC.
             TIMESTAMP_SECOND_TYPE_VARIATION_REF => {
-                ScalarValue::TimestampSecond(Some(*t), Some("UTC".into()))
+                ScalarValue::TimestampSecond(Some(*t), Some(DEFAULT_TIMEZONE.into()))
             }
             TIMESTAMP_MILLI_TYPE_VARIATION_REF => {
-                ScalarValue::TimestampMillisecond(Some(*t), Some("UTC".into()))
+                ScalarValue::TimestampMillisecond(Some(*t), Some(DEFAULT_TIMEZONE.into()))
             }
             TIMESTAMP_MICRO_TYPE_VARIATION_REF => {
-                ScalarValue::TimestampMicrosecond(Some(*t), Some("UTC".into()))
+                ScalarValue::TimestampMicrosecond(Some(*t), Some(DEFAULT_TIMEZONE.into()))
             }
             TIMESTAMP_NANO_TYPE_VARIATION_REF => {
-                ScalarValue::TimestampNanosecond(Some(*t), Some("UTC".into()))
+                ScalarValue::TimestampNanosecond(Some(*t), Some(DEFAULT_TIMEZONE.into()))
             }
             others => {
                 return substrait_err!("Unknown type variation reference {others}");
@@ -2000,6 +2002,30 @@ fn from_substrait_null(
                 TIMESTAMP_NANO_TYPE_VARIATION_REF => {
                     Ok(ScalarValue::TimestampNanosecond(None, None))
                 }
+                v => not_impl_err!(
+                    "Unsupported Substrait type variation {v} of type {kind:?}"
+                ),
+            },
+            r#type::Kind::TimestampTz(ts) => match ts.type_variation_reference {
+                TIMESTAMP_SECOND_TYPE_VARIATION_REF => Ok(ScalarValue::TimestampSecond(
+                    None,
+                    Some(DEFAULT_TIMEZONE.into()),
+                )),
+                TIMESTAMP_MILLI_TYPE_VARIATION_REF => {
+                    Ok(ScalarValue::TimestampMillisecond(
+                        None,
+                        Some(DEFAULT_TIMEZONE.into()),
+                    ))
+                }
+                TIMESTAMP_MICRO_TYPE_VARIATION_REF => {
+                    Ok(ScalarValue::TimestampMicrosecond(
+                        None,
+                        Some(DEFAULT_TIMEZONE.into()),
+                    ))
+                }
+                TIMESTAMP_NANO_TYPE_VARIATION_REF => Ok(
+                    ScalarValue::TimestampNanosecond(None, Some(DEFAULT_TIMEZONE.into())),
+                ),
                 v => not_impl_err!(
                     "Unsupported Substrait type variation {v} of type {kind:?}"
                 ),
