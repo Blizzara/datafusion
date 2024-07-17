@@ -2186,7 +2186,7 @@ mod test {
     fn round_trip_literal(scalar: ScalarValue) -> Result<()> {
         println!("Checking round trip of {scalar:?}");
 
-        let mut extensions = Extensions::new();
+        let mut extensions = Extensions::default();
         let substrait_literal = to_substrait_literal(&scalar, &mut extensions)?;
         let roundtrip_scalar =
             from_substrait_literal_without_names(&substrait_literal, &extensions)?;
