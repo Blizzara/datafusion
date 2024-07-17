@@ -21,11 +21,11 @@ use datafusion::arrow::array::GenericListArray;
 use datafusion::arrow::datatypes::{
     DataType, Field, FieldRef, Fields, IntervalUnit, Schema, TimeUnit,
 };
+use datafusion::common::plan_err;
 use datafusion::common::{
     not_impl_err, plan_datafusion_err, substrait_datafusion_err, substrait_err, DFSchema,
     DFSchemaRef,
 };
-use datafusion::common::{plan_err, DataFusionError};
 use datafusion::execution::FunctionRegistry;
 use datafusion::logical_expr::expr::{Exists, InSubquery, Sort};
 
@@ -71,7 +71,6 @@ use substrait::proto::expression::literal::{
 };
 use substrait::proto::expression::subquery::SubqueryType;
 use substrait::proto::expression::{self, FieldReference, Literal, ScalarFunction};
-use substrait::proto::extensions::SimpleExtensionDeclaration;
 use substrait::proto::read_rel::local_files::file_or_files::PathType::UriFile;
 use substrait::proto::{
     aggregate_function::AggregationInvocation,
@@ -82,7 +81,6 @@ use substrait::proto::{
         window_function::bound::Kind as BoundKind, window_function::Bound,
         window_function::BoundsType, MaskExpression, RexType,
     },
-    extensions::simple_extension_declaration::MappingType,
     function_argument::ArgType,
     join_rel, plan_rel, r#type,
     read_rel::ReadType,
@@ -1492,7 +1490,7 @@ fn from_substrait_type(
             },
             r#type::Kind::UserDefined(u) => {
                 if let Some(name) = extensions.types.get(&u.type_reference) {
-                    match name {
+                    match name.as_ref() {
                         INTERVAL_MONTH_DAY_NANO_TYPE_URL => Ok(DataType::Interval(IntervalUnit::MonthDayNano)),
                             _ => not_impl_err!(
                                 "Unsupported Substrait user defined type with ref {} and variation {}",
@@ -1836,7 +1834,7 @@ fn from_substrait_literal(
                 };
 
             if let Some(name) = extensions.types.get(&user_defined.type_reference) {
-                match name {
+                match name.as_ref() {
                     INTERVAL_MONTH_DAY_NANO_TYPE_URL => {
                         interval_month_day_nano(user_defined)?
                     }

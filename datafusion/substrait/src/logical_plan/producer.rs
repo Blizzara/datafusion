@@ -16,7 +16,6 @@
 // under the License.
 
 use itertools::Itertools;
-use std::collections::HashMap;
 use std::ops::Deref;
 use std::sync::Arc;
 
@@ -38,10 +37,10 @@ use crate::variation_const::{
     DATE_32_TYPE_VARIATION_REF, DATE_64_TYPE_VARIATION_REF,
     DECIMAL_128_TYPE_VARIATION_REF, DECIMAL_256_TYPE_VARIATION_REF,
     DEFAULT_CONTAINER_TYPE_VARIATION_REF, DEFAULT_TYPE_VARIATION_REF,
-    INTERVAL_MONTH_DAY_NANO_TYPE_REF, INTERVAL_MONTH_DAY_NANO_TYPE_URL,
-    LARGE_CONTAINER_TYPE_VARIATION_REF, TIMESTAMP_MICRO_TYPE_VARIATION_REF,
-    TIMESTAMP_MILLI_TYPE_VARIATION_REF, TIMESTAMP_NANO_TYPE_VARIATION_REF,
-    TIMESTAMP_SECOND_TYPE_VARIATION_REF, UNSIGNED_INTEGER_TYPE_VARIATION_REF,
+    INTERVAL_MONTH_DAY_NANO_TYPE_URL, LARGE_CONTAINER_TYPE_VARIATION_REF,
+    TIMESTAMP_MICRO_TYPE_VARIATION_REF, TIMESTAMP_MILLI_TYPE_VARIATION_REF,
+    TIMESTAMP_NANO_TYPE_VARIATION_REF, TIMESTAMP_SECOND_TYPE_VARIATION_REF,
+    UNSIGNED_INTEGER_TYPE_VARIATION_REF,
 };
 use datafusion::arrow::array::{Array, GenericListArray, OffsetSizeTrait};
 use datafusion::common::{
@@ -63,8 +62,6 @@ use substrait::proto::expression::literal::{
 };
 use substrait::proto::expression::subquery::InPredicate;
 use substrait::proto::expression::window_function::BoundsType;
-use substrait::proto::extensions::simple_extension_declaration::ExtensionType;
-use substrait::proto::extensions::SimpleExtensionDeclaration;
 use substrait::proto::read_rel::VirtualTable;
 use substrait::proto::{CrossRel, ExchangeRel};
 use substrait::{
@@ -83,10 +80,6 @@ use substrait::{
             FieldReference, IfThen, Literal, MaskExpression, ReferenceSegment, RexType,
             ScalarFunction, SingularOrList, Subquery,
             WindowFunction as SubstraitWindowFunction,
-        },
-        extensions::{
-            self,
-            simple_extension_declaration::{ExtensionFunction, MappingType},
         },
         function_argument::ArgType,
         join_rel, plan_rel, r#type,
