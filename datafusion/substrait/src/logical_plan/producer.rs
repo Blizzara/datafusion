@@ -2259,7 +2259,7 @@ mod test {
     fn round_trip_type(dt: DataType) -> Result<()> {
         println!("Checking round trip of {dt:?}");
 
-        let mut extensions = Extensions::new();
+        let mut extensions = Extensions::default();
 
         // As DataFusion doesn't consider nullability as a property of the type, but field,
         // it doesn't matter if we set nullability to true or false here.
