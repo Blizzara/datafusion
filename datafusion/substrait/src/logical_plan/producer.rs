@@ -97,7 +97,7 @@ use substrait::{
 
 /// Convert DataFusion LogicalPlan to Substrait Plan
 pub fn to_substrait_plan(plan: &LogicalPlan, ctx: &SessionContext) -> Result<Box<Plan>> {
-    let mut extensions = Extensions::new();
+    let mut extensions = Extensions::default();
     // Parse relation nodes
     // Generate PlanRel(s)
     // Note: Only 1 relation tree is currently supported

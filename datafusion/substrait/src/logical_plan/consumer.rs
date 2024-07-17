@@ -41,11 +41,15 @@ use crate::variation_const::{
     DATE_32_TYPE_VARIATION_REF, DATE_64_TYPE_VARIATION_REF,
     DECIMAL_128_TYPE_VARIATION_REF, DECIMAL_256_TYPE_VARIATION_REF,
     DEFAULT_CONTAINER_TYPE_VARIATION_REF, DEFAULT_TYPE_VARIATION_REF,
-    INTERVAL_DAY_TIME_TYPE_REF, INTERVAL_MONTH_DAY_NANO_TYPE_NAME,
-    INTERVAL_MONTH_DAY_NANO_TYPE_REF, INTERVAL_YEAR_MONTH_TYPE_REF,
-    LARGE_CONTAINER_TYPE_VARIATION_REF, TIMESTAMP_MICRO_TYPE_VARIATION_REF,
-    TIMESTAMP_MILLI_TYPE_VARIATION_REF, TIMESTAMP_NANO_TYPE_VARIATION_REF,
-    TIMESTAMP_SECOND_TYPE_VARIATION_REF, UNSIGNED_INTEGER_TYPE_VARIATION_REF,
+    INTERVAL_MONTH_DAY_NANO_TYPE_NAME, LARGE_CONTAINER_TYPE_VARIATION_REF,
+    TIMESTAMP_MICRO_TYPE_VARIATION_REF, TIMESTAMP_MILLI_TYPE_VARIATION_REF,
+    TIMESTAMP_NANO_TYPE_VARIATION_REF, TIMESTAMP_SECOND_TYPE_VARIATION_REF,
+    UNSIGNED_INTEGER_TYPE_VARIATION_REF,
+};
+#[allow(deprecated)]
+use crate::variation_const::{
+    INTERVAL_DAY_TIME_TYPE_REF, INTERVAL_MONTH_DAY_NANO_TYPE_REF,
+    INTERVAL_YEAR_MONTH_TYPE_REF,
 };
 use datafusion::common::scalar::ScalarStructBuilder;
 use datafusion::logical_expr::expr::InList;
@@ -1500,6 +1504,7 @@ fn from_substrait_type(
                     }
                 } else {
                     // Kept for backwards compatibility, new plans should include the extension instead
+                    #[allow(deprecated)]
                     match u.type_reference {
                         // Kept for backwards compatibility, use IntervalYear instead
                         INTERVAL_YEAR_MONTH_TYPE_REF => {
@@ -1848,6 +1853,7 @@ fn from_substrait_literal(
                 }
             } else {
                 // Kept for backwards compatibility - new plans should include extension instead
+                #[allow(deprecated)]
                 match user_defined.type_reference {
                     // Kept for backwards compatibility, use IntervalYearToMonth instead
                     INTERVAL_YEAR_MONTH_TYPE_REF => {

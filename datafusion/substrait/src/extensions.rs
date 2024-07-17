@@ -22,6 +22,7 @@ use substrait::proto::extensions::simple_extension_declaration::{
 };
 use substrait::proto::extensions::SimpleExtensionDeclaration;
 
+#[derive(Default)]
 pub struct Extensions {
     pub functions: HashMap<u32, String>,
     pub types: HashMap<u32, String>,
@@ -29,14 +30,6 @@ pub struct Extensions {
 }
 
 impl Extensions {
-    pub fn new() -> Self {
-        Self {
-            functions: HashMap::new(),
-            types: HashMap::new(),
-            type_variations: HashMap::new(),
-        }
-    }
-
     pub fn register_function(&mut self, function_name: String) -> u32 {
         let function_name = function_name.to_lowercase();
 
@@ -107,10 +100,10 @@ impl TryFrom<&Vec<SimpleExtensionDeclaration>> for Extensions {
     }
 }
 
-impl Into<Vec<SimpleExtensionDeclaration>> for Extensions {
-    fn into(self) -> Vec<SimpleExtensionDeclaration> {
+impl From<Extensions> for Vec<SimpleExtensionDeclaration> {
+    fn from(val: Extensions) -> Vec<SimpleExtensionDeclaration> {
         let mut extensions = vec![];
-        for (f_anchor, f_name) in self.functions {
+        for (f_anchor, f_name) in val.functions {
             let function_extension = ExtensionFunction {
                 extension_uri_reference: u32::MAX,
                 function_anchor: f_anchor,
@@ -122,7 +115,7 @@ impl Into<Vec<SimpleExtensionDeclaration>> for Extensions {
             extensions.push(simple_extension);
         }
 
-        for (t_anchor, t_name) in self.types {
+        for (t_anchor, t_name) in val.types {
             let type_extension = ExtensionType {
                 extension_uri_reference: u32::MAX, // We don't register proper extension URIs yet
                 type_anchor: t_anchor,
@@ -134,7 +127,7 @@ impl Into<Vec<SimpleExtensionDeclaration>> for Extensions {
             extensions.push(simple_extension);
         }
 
-        for (tv_anchor, tv_name) in self.type_variations {
+        for (tv_anchor, tv_name) in val.type_variations {
             let type_variation_extension = ExtensionTypeVariation {
                 extension_uri_reference: u32::MAX, // We don't register proper extension URIs yet
                 type_variation_anchor: tv_anchor,
