@@ -41,8 +41,8 @@ use crate::variation_const::{
     DATE_32_TYPE_VARIATION_REF, DATE_64_TYPE_VARIATION_REF,
     DECIMAL_128_TYPE_VARIATION_REF, DECIMAL_256_TYPE_VARIATION_REF,
     DEFAULT_CONTAINER_TYPE_VARIATION_REF, DEFAULT_TYPE_VARIATION_REF,
-    INTERVAL_DAY_TIME_TYPE_REF, INTERVAL_MONTH_DAY_NANO_TYPE_REF,
-    INTERVAL_MONTH_DAY_NANO_TYPE_URL, INTERVAL_YEAR_MONTH_TYPE_REF,
+    INTERVAL_DAY_TIME_TYPE_REF, INTERVAL_MONTH_DAY_NANO_TYPE_NAME,
+    INTERVAL_MONTH_DAY_NANO_TYPE_REF, INTERVAL_YEAR_MONTH_TYPE_REF,
     LARGE_CONTAINER_TYPE_VARIATION_REF, TIMESTAMP_MICRO_TYPE_VARIATION_REF,
     TIMESTAMP_MILLI_TYPE_VARIATION_REF, TIMESTAMP_NANO_TYPE_VARIATION_REF,
     TIMESTAMP_SECOND_TYPE_VARIATION_REF, UNSIGNED_INTEGER_TYPE_VARIATION_REF,
@@ -1491,7 +1491,7 @@ fn from_substrait_type(
             r#type::Kind::UserDefined(u) => {
                 if let Some(name) = extensions.types.get(&u.type_reference) {
                     match name.as_ref() {
-                        INTERVAL_MONTH_DAY_NANO_TYPE_URL => Ok(DataType::Interval(IntervalUnit::MonthDayNano)),
+                        INTERVAL_MONTH_DAY_NANO_TYPE_NAME => Ok(DataType::Interval(IntervalUnit::MonthDayNano)),
                             _ => not_impl_err!(
                                 "Unsupported Substrait user defined type with ref {} and variation {}",
                                 u.type_reference,
@@ -1835,7 +1835,7 @@ fn from_substrait_literal(
 
             if let Some(name) = extensions.types.get(&user_defined.type_reference) {
                 match name.as_ref() {
-                    INTERVAL_MONTH_DAY_NANO_TYPE_URL => {
+                    INTERVAL_MONTH_DAY_NANO_TYPE_NAME => {
                         interval_month_day_nano(user_defined)?
                     }
                     _ => {

@@ -37,7 +37,7 @@ use crate::variation_const::{
     DATE_32_TYPE_VARIATION_REF, DATE_64_TYPE_VARIATION_REF,
     DECIMAL_128_TYPE_VARIATION_REF, DECIMAL_256_TYPE_VARIATION_REF,
     DEFAULT_CONTAINER_TYPE_VARIATION_REF, DEFAULT_TYPE_VARIATION_REF,
-    INTERVAL_MONTH_DAY_NANO_TYPE_URL, LARGE_CONTAINER_TYPE_VARIATION_REF,
+    INTERVAL_MONTH_DAY_NANO_TYPE_NAME, LARGE_CONTAINER_TYPE_VARIATION_REF,
     TIMESTAMP_MICRO_TYPE_VARIATION_REF, TIMESTAMP_MILLI_TYPE_VARIATION_REF,
     TIMESTAMP_NANO_TYPE_VARIATION_REF, TIMESTAMP_SECOND_TYPE_VARIATION_REF,
     UNSIGNED_INTEGER_TYPE_VARIATION_REF,
@@ -1457,7 +1457,7 @@ fn to_substrait_type(
                     Ok(substrait::proto::Type {
                         kind: Some(r#type::Kind::UserDefined(r#type::UserDefined {
                             type_reference: extensions.register_type(
-                                INTERVAL_MONTH_DAY_NANO_TYPE_URL.to_string(),
+                                INTERVAL_MONTH_DAY_NANO_TYPE_NAME.to_string(),
                             ),
                             type_variation_reference: DEFAULT_TYPE_VARIATION_REF,
                             nullability,
@@ -1868,10 +1868,10 @@ fn to_substrait_literal(
             (
                 LiteralType::UserDefined(UserDefined {
                     type_reference: extensions
-                        .register_type(INTERVAL_MONTH_DAY_NANO_TYPE_URL.to_string()),
+                        .register_type(INTERVAL_MONTH_DAY_NANO_TYPE_NAME.to_string()),
                     type_parameters: vec![],
                     val: Some(user_defined::Val::Value(ProtoAny {
-                        type_url: INTERVAL_MONTH_DAY_NANO_TYPE_URL.to_string(),
+                        type_url: INTERVAL_MONTH_DAY_NANO_TYPE_NAME.to_string(),
                         value: bytes.to_vec().into(),
                     })),
                 }),
