@@ -1399,18 +1399,22 @@ fn from_substrait_type(
                 // Substrait TimestampTz only says that the timestamp is relative to UTC, which
                 // is the same as the expectation for any non-empty timezone in DF. Which timezone
                 // we select here doesn't really matter that much, but we default to UTC.
-                TIMESTAMP_SECOND_TYPE_VARIATION_REF => {
-                    Ok(DataType::Timestamp(TimeUnit::Second, Some(DEFAULT_TIMEZONE.into())))
-                }
-                TIMESTAMP_MILLI_TYPE_VARIATION_REF => {
-                    Ok(DataType::Timestamp(TimeUnit::Millisecond, Some(DEFAULT_TIMEZONE.into())))
-                }
-                TIMESTAMP_MICRO_TYPE_VARIATION_REF => {
-                    Ok(DataType::Timestamp(TimeUnit::Microsecond, Some(DEFAULT_TIMEZONE.into())))
-                }
-                TIMESTAMP_NANO_TYPE_VARIATION_REF => {
-                    Ok(DataType::Timestamp(TimeUnit::Nanosecond, Some(DEFAULT_TIMEZONE.into())))
-                }
+                TIMESTAMP_SECOND_TYPE_VARIATION_REF => Ok(DataType::Timestamp(
+                    TimeUnit::Second,
+                    Some(DEFAULT_TIMEZONE.into()),
+                )),
+                TIMESTAMP_MILLI_TYPE_VARIATION_REF => Ok(DataType::Timestamp(
+                    TimeUnit::Millisecond,
+                    Some(DEFAULT_TIMEZONE.into()),
+                )),
+                TIMESTAMP_MICRO_TYPE_VARIATION_REF => Ok(DataType::Timestamp(
+                    TimeUnit::Microsecond,
+                    Some(DEFAULT_TIMEZONE.into()),
+                )),
+                TIMESTAMP_NANO_TYPE_VARIATION_REF => Ok(DataType::Timestamp(
+                    TimeUnit::Nanosecond,
+                    Some(DEFAULT_TIMEZONE.into()),
+                )),
                 v => not_impl_err!(
                     "Unsupported Substrait type variation {v} of type {s_kind:?}"
                 ),
