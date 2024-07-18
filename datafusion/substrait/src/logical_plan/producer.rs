@@ -48,8 +48,10 @@ use datafusion::logical_expr::{expr, Between, JoinConstraint, LogicalPlan, Opera
 use datafusion::prelude::Expr;
 use pbjson_types::Any as ProtoAny;
 use substrait::proto::exchange_rel::{ExchangeKind, RoundRobin, ScatterFields};
+use substrait::proto::expression::literal::map::KeyValue;
 use substrait::proto::expression::literal::{
-    user_defined, IntervalDayToSecond, IntervalYearToMonth, List, Struct, UserDefined,
+    user_defined, IntervalDayToSecond, IntervalYearToMonth, List, Map, Struct,
+    UserDefined,
 };
 use substrait::proto::expression::subquery::InPredicate;
 use substrait::proto::expression::window_function::BoundsType;
@@ -2003,6 +2005,45 @@ fn to_substrait_literal(value: &ScalarValue) -> Result<Literal> {
             convert_array_to_literal_list(l)?,
             LARGE_CONTAINER_TYPE_VARIATION_REF,
         ),
+        ScalarValue::Map(m) => {
+            let map = if m.is_empty() || m.value(0).is_empty() {
+                let mt = to_substrait_type(m.data_type(), m.is_nullable())?;
+                let mt = match mt {
+                    substrait::proto::Type {
+                        kind: Some(r#type::Kind::Map(mt)),
+                    } => Ok(mt.as_ref().to_owned()),
+                    _ => exec_err!("Unexpected type for a map: {mt:?}"),
+                }?;
+                LiteralType::EmptyMap(mt)
+            } else {
+                let keys = (0..m.keys().len())
+                    .map(|i| {
+                        to_substrait_literal(&ScalarValue::try_from_array(&m.keys(), i)?)
+                    })
+                    .collect::<Result<Vec<_>>>()?;
+                let values = (0..m.values().len())
+                    .map(|i| {
+                        to_substrait_literal(&ScalarValue::try_from_array(
+                            &m.values(),
+                            i,
+                        )?)
+                    })
+                    .collect::<Result<Vec<_>>>()?;
+
+                let key_values = keys
+                    .into_iter()
+                    .zip(values.into_iter())
+                    .map(|(k, v)| {
+                        Ok(KeyValue {
+                            key: Some(k),
+                            value: Some(v),
+                        })
+                    })
+                    .collect::<Result<Vec<_>>>()?;
+                LiteralType::Map(Map { key_values })
+            };
+            (map, DEFAULT_CONTAINER_TYPE_VARIATION_REF)
+        }
         ScalarValue::Struct(s) => (
             LiteralType::Struct(Struct {
                 fields: s
@@ -2039,13 +2080,13 @@ fn convert_array_to_literal_list<T: OffsetSizeTrait>(
         .collect::<Result<Vec<_>>>()?;
 
     if values.is_empty() {
-        let et = match to_substrait_type(array.data_type(), array.is_nullable())? {
+        let lt = match to_substrait_type(array.data_type(), array.is_nullable())? {
             substrait::proto::Type {
                 kind: Some(r#type::Kind::List(lt)),
             } => lt.as_ref().to_owned(),
             _ => unreachable!(),
         };
-        Ok(LiteralType::EmptyList(et))
+        Ok(LiteralType::EmptyList(lt))
     } else {
         Ok(LiteralType::List(List { values }))
     }
@@ -2165,7 +2206,9 @@ mod test {
         from_substrait_literal_without_names, from_substrait_type_without_names,
     };
     use arrow_buffer::{IntervalDayTime, IntervalMonthDayNano};
-    use datafusion::arrow::array::GenericListArray;
+    use datafusion::arrow::array::{
+        GenericListArray, Int64Builder, MapBuilder, StringBuilder,
+    };
     use datafusion::arrow::datatypes::Field;
     use datafusion::common::scalar::ScalarStructBuilder;
 
@@ -2231,6 +2274,28 @@ mod test {
                 1,
             ),
         )))?;
+
+        // Null map
+        let mut map_builder =
+            MapBuilder::new(None, StringBuilder::new(), Int64Builder::new());
+        map_builder.append(false)?;
+        round_trip_literal(ScalarValue::Map(Arc::new(map_builder.finish())))?;
+
+        // Empty map
+        let mut map_builder =
+            MapBuilder::new(None, StringBuilder::new(), Int64Builder::new());
+        map_builder.append(true)?;
+        round_trip_literal(ScalarValue::Map(Arc::new(map_builder.finish())))?;
+
+        // Valid map
+        let mut map_builder =
+            MapBuilder::new(None, StringBuilder::new(), Int64Builder::new());
+        map_builder.keys().append_value("key1");
+        map_builder.keys().append_value("key2");
+        map_builder.values().append_value(1);
+        map_builder.values().append_value(2);
+        map_builder.append(true)?;
+        round_trip_literal(ScalarValue::Map(Arc::new(map_builder.finish())))?;
 
         let c0 = Field::new("c0", DataType::Boolean, true);
         let c1 = Field::new("c1", DataType::Int32, true);
