@@ -248,7 +248,7 @@ impl Interval {
     ///     to `NULL`s.
     pub fn try_new(lower: ScalarValue, upper: ScalarValue) -> Result<Self> {
         if lower.data_type() != upper.data_type() {
-            return internal_err!("Endpoints of an Interval should have the same type");
+            return internal_err!("Endpoints of an Interval should have the same type, but got lower: {} and upper: {}", lower.data_type(), upper.data_type());
         }
 
         let interval = Self::new(lower, upper);
